@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Tree</title>
+
+
+  <style>
+    /* General Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Tree Structure Styles */
+    .tree ul {
+      padding-left: 20px;
+      position: relative;
+      transition: all 0.5s;
+      list-style-type: none;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tree li {
+      text-align: center;
+      position: relative;
+      padding: 20px 5px 0 5px;
+      transition: all 0.5s;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    /* Connectors */
+    .tree li::before {
+      content: '';
+      position: absolute;
+      border-left: 1px solid #ccc;
+      height: 100%;
+      top: 0;
+      bottom: 0;
+      left: -20px;
+    }
+
+    .tree li::after {
+      content: '';
+      position: absolute;
+      border-top: 1px solid #ccc;
+      width: 25px;
+      top: 50%;
+      transform: translateY(-50%);
+      left: -20px;
+      right: -20px;
+    }
+
+ /* Remove space from the top of single children */
+ .tree li:only-child {
+    padding-top: 0;
+  }
+
+    /* Remove left-right connectors from elements without any siblings */
+    .tree li:only-child::after,
+  .tree li:only-child::before {
+    display: none;
+  }
+
+
+
+
+    /* Link Styles */
+    .tree li a {
+      border: 1px solid #ccc;
+      padding: 5px 10px;
+      text-decoration: none;
+      color: white;
+      font-family: Arial, verdana, tahoma;
+      font-size: 11px;
+      display: inline-flex;
+      flex-direction: column;
+      border-radius: 5px;
+      transition: all 0.5s;
+      text-align: center;
+    }
+
+    /* Hover Effects */
+    .tree li a:hover {
+      background: #c8e4f8;
+      color: #000;
+      border: 1px solid #94a0b4;
+    }
+
+    /* Zoom Effect for Clicked Item */
+    .tree li a:active,
+    .tree li a:focus {
+      font-size: 1.2em;
+      color: #0044cc;
+      width: auto;
+      max-width: 150px;
+      padding: 5px 10px;
+    }
+
+    /* Container Styles */
+    .container {
+      margin: 20px auto;
+      width: 80%;
+    }
+
+    /* Adjust the tree margin and width to fit inside the container */
+    .tree {
+      text-align: left;
+      margin: 10px;
+      width: 300px;
+    }
+
+
+    .myTable {
+    border-collapse: collapse;
+    width: 80%; /* Adjust the width as needed */
+    margin: 20px auto; /* Center the table */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Add shadow for depth */
+    background-color: #ffffff; /* White background for the table */
+  }
+
+  .myTable th, .myTable td {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 12px 15px; /* Adjust padding for better spacing */
+  }
+
+  .myTable th {
+    background-color: #4CAF50; /* Green header */
+    color: white;
+  }
+
+  /* Hover effect for rows */
+  .myTable tr:hover {
+    background-color: #f5f5f5;
+  }
+
+
+  #portfolioHeading {
+    text-align: center; /* Center the heading */
+    position: fixed; /* Make it fixed at the top */
+    width: 100%; /* Full width to center correctly */
+    background-color: #e8f4f8; /* Soft light blue that complements white */
+    padding: 10px 0; /* Padding for spacing */
+    top: 0; /* Position at the very top */
+    left: 0; /* Align to the left edge */
+    z-index: 1000; /* Ensure it's above other elements */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Adds a subtle shadow for depth */
+    font-family: 'Arial', sans-serif; /* Use a more appealing font */
+    font-size: 24px; /* Increase the font size */
+    font-weight: bold; /* Make the text bold */
+    color: #333; /* A darker color for better readability */
+  }
+
+
+  #column-1 {
+    background-color: blue;
+  }
+
+  #column-2 {
+    background-color: #9381ff;
+  }
+  #column-3 {
+    background-color: red;
+  }
+  #column-4 {
+    background-color: #333;
+  }
+  #column-5 {
+    background-color: #666;
+  }
+
+  #column-6 {
+    background-color: #f26419;
+  }
+
+  #column-7 {
+    background-color: #274c77;
+  }
+
+
+
+  .colorLegendContainer {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      max-width: 400px; /* Set a maximum width for the container */
+      width: 100%; /* Ensure the container takes 100% width within its parent */
+    }
+
+    .colorLegendTable {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .colorLegendTh {
+      background-color: #3498db;
+      color: #fff;
+    }
+
+    .colorLegendTr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .colorLegendTr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .colorLegendTd {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+      font-weight: bold;
+    }
+
+    body {
+    background: #6dd5ed;
+    font-family: Arial, sans-serif; /* Clean and modern font */
+    padding-top: 60px; /* Top padding */
+
+}
+
+  .sticky-container {
+    position: sticky;
+    top: 0;
+    left: 0;
+  }
+
+  </style>
+
+
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script>
+    $(document).ready(function () {
+      function fetchRoleData(callback) {
+        $.get('/role', function (data) {
+          callback(data.answer, data.list_name, data.color);
+        });
+      }
+
+      function fetchDataFromScope(node, callback) {
+        var nameAttribute = node.find('a').attr('name');
+        console.log(nameAttribute)
+        $.ajax({
+          url: '/scope',
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({ scope: node.text(), name: nameAttribute }),
+          success: function (data) {
+            callback(data.answer, node, data.list_name, data.color);
+          }
+        });
+      }
+
+      function buildTree(node, parent, listName, color) {
+        var ul = $('<ul ></ul>');
+
+        if (listName === 'Table') {
+          var nestedList = node
+          console.log(nestedList)
+          // Check if listName is 'Table'
+          var listName = 'Table';
+
+
+          var table = document.createElement('table');
+          table.className = 'myTable';
+
+          // Create a header row
+          var headerRow = document.createElement('tr');
+          ['Core / Context', 'SPC Family', 'Skill - Level (L1, L2, L3, L4)', 'Delivery Model (Local / Remote)'].forEach(function (headerText) {
+            var th = document.createElement('th');
+            th.textContent = headerText;
+            headerRow.appendChild(th);
+          });
+          table.appendChild(headerRow);
+
+          // Iterate through each index (column) of the nested lists
+          for (var i = 0; i < 1; i++) {
+            // Create a new cell for each nested list at the current index
+            var rowData = document.createElement('tr');
+            nestedList.forEach(function (nestedItem) {
+              var cell = document.createElement('td');
+              // Use the value at the current index, or an empty string if it doesn't exist
+              var value = nestedItem[i] || '';
+              cell.textContent = value;
+              rowData.appendChild(cell);
+            });
+
+            // Append the row to the table
+            table.appendChild(rowData);
+          }
+
+          // Assuming parent is the container where you want to append the table
+          // parent.appendChild(table);
+
+          // Append the row to the table
+          // table.appendChild(rowData);
+
+          ul.append(table);
+          parent.append(ul);
+          var connector = $('<div class="connector"></div>');
+          parent.append(connector);
+          connector.css({
+            left: parent.position().left + parent.outerWidth() / 2,
+            top: parent.position().top + parent.outerHeight(),
+            height: ul.position().top - (parenth.position().top + parent.outerHeight())
+          });
+
+
+        } else {
+          // Display a regular list
+          $.each(node, function (index, value) {
+          console.log(listName)
+            var li = $('<li><a  href="#"  id="' + color + '"  name="' + listName + '">' + value + '</a></li>')
+            ul.append(li);
+          });
+          parent.append(ul);
+
+          var connector = $('<div class="connector"></div>');
+          parent.append(connector);
+          connector.css({
+            left: parent.position().left + parent.outerWidth() / 2,
+            top: parent.position().top + parent.outerHeight(),
+            height: ul.position().top - (parent.position().top + parent.outerHeight())
+          });
+        }
+      }
+
+      $('.tree ul ul').hide();
+
+      $('.tree').on('click', 'li a', function (e) {
+        e.preventDefault();
+        var currentLink = $(this);
+        var parent = currentLink.parent();
+
+        if (parent.find('ul').length === 0) {
+          if (currentLink.text() === 'Portfolio') {
+            // Fetch and build tree for Roles
+            fetchRoleData(function (roleData, listName, color) {
+              buildTree(roleData, parent, listName, color);
+            });
+          } else {
+            // Fetch and build tree for Scope
+            fetchRoleData(function (roleData, listName) {
+              fetchDataFromScope(parent, function (data, node, listName, color) {
+                buildTree(data, node, listName, color);
+                node.find('ul').toggle();
+              });
+            });
+          }
+        } else {
+          parent.find('ul').toggle();
+        }
+      });
+    });
+  </script>
+</head>
+
+<body>
+  <h1 id="portfolioHeading">Portfolio</h1>
+
+  <div class="flex-container" style="display: flex;">
+
+  <div class="sticky-container">
+    <div class="colorLegendContainer">
+      <table class="colorLegendTable">
+        <tr>
+          <th class="colorLegendTh">Color</th>
+          <th class="colorLegendTh">Legend</th>
+        </tr>
+        <tr class="colorLegendTr">
+          <td class="colorLegendTd" style="background-color: blue"></td> <!-- Soft Marine Blue -->
+          <td class="colorLegendTd">Service</td>
+        </tr>
+        <tr class="colorLegendTr">
+          <td class="colorLegendTd" style="background-color: #9381ff;"></td> <!-- Gentle Blush -->
+          <td class="colorLegendTd">Sub-Stream</td>
+        </tr>
+        <tr class="colorLegendTr">
+          <td class="colorLegendTd" style="background-color: red;"></td> <!-- Muted Seafoam Green -->
+          <td class="colorLegendTd">Role</td>
+        </tr>
+        <tr class="colorLegendTr">
+          <td class="colorLegendTd" style="background-color: #333;"></td> <!-- Dusty Rose -->
+          <td class="colorLegendTd">Scope</td>
+        </tr>
+        <tr class="colorLegendTr">
+          <td class="colorLegendTd" style="background-color: #666;"></td> <!-- Light Sand -->
+          <td class="colorLegendTd">Work Package</td>
+        </tr>
+        <tr class="colorLegendTr">
+          <td class="colorLegendTd" style="background-color: #f26419;"></td> <!-- Light Sand -->
+          <td class="colorLegendTd">Activity (L6)</td>
+        </tr>
+        <tr class="colorLegendTr">
+          <td class="colorLegendTd" style="background-color: #274c77;"></td> <!-- Light Sand -->
+          <td class="colorLegendTd">Work Instruction (L7) & Standard Effort (Mins)</td>
+        </tr>
+      </table>
+    </div>
+
+  </div>
+
+
+
+  <div class="container" style="width: max-content;">
+    <div class="tree">
+      <ul>
+        <li>
+          <a href="#" style="background-color: green; margin-top: 0;">Portfolio</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    var zoomFactor = 1.2; // Set the zoom factor (1.2 = 120%)
+
+    // Function to zoom in
+    function zoomIn() {
+        zoomFactor *= 1.2;
+        document.body.style.transform = "scale(" + zoomFactor + ")";
+        document.body.style.transformOrigin = "center top";
+    }
+
+    // Attach the zoomIn function to your button's click event
+    var zoomButton = document.getElementById("yourZoomButtonId"); // Replace with your button's ID
+    if (zoomButton) {
+        zoomButton.addEventListener("click", zoomIn);
+    }
+});
+
+</script>
+
+</body>
+
+</html>
